@@ -11,6 +11,9 @@ set(SOURCES
     #src/option_mc.cpp
     #src/black_scholes.hpp
     main.cpp
+    headers/options.h
+    headers/rapidcsv.h
+    headers/pricing_models.h
     #src/rapidcsv.hpp
 )
 
