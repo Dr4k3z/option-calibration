@@ -1,8 +1,27 @@
 #include "../headers/date.h"
+#include "../headers/rapidcsv.h"
 
 #include <iostream>
 #include <algorithm> 
-#include <vector>
+
+Date::Date(std::string datetime){
+       std::stringstream ss(datetime);
+       std::string token;
+
+       // Extract year
+       std::getline(ss, token, '/');
+       year = std::stoi(token);
+
+       // Extract month
+       std::getline(ss, token, '/');
+       month = std::stoi(token);
+
+       // Extract day
+       std::getline(ss, token, '/');
+       day = std::stoi(token);
+
+       weekday = UNKNOWN;
+}
 
 int Date::diff(const Date& p1, const Date& p2){
        int year_diff = abs(p1.year - p2.year);
@@ -11,7 +30,7 @@ int Date::diff(const Date& p1, const Date& p2){
        return year_diff*365+month_diff*30+day_diff;
 }
 
-int Date::dayDifference(const Date& p){
+int Date::dayDifference(const Date& p, bool trading){
        return diff(*this,p);
 }
 
@@ -29,7 +48,6 @@ void Date::initializeWeekDay(){
               else { d++; }
               //begin.print();
        }
-
        weekday = static_cast<WeekDay>(d);
 }
 
@@ -88,6 +106,13 @@ bool Date::operator<(const Date& p) const{
 bool Date::operator>(const Date& p) const{
        if (*this < p){ return false; }
        else { return true; }
+}
+
+bool Date::operator==(const Date& p) const{
+       if (p.year == year && p.month == month && p.day == day){
+              return true;
+       }
+       return false;
 }
 
 Month int2Month(int i){

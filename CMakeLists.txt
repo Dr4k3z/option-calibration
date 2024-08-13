@@ -15,6 +15,7 @@ set(SOURCES
     headers/rapidcsv.h
     headers/pricing_models.h
     headers/date.h
+    headers/calendar.h
     #src/rapidcsv.hpp
     src/date.cpp
 )
