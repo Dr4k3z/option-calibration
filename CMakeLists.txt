@@ -14,7 +14,9 @@ set(SOURCES
     headers/options.h
     headers/rapidcsv.h
     headers/pricing_models.h
+    headers/date.h
     #src/rapidcsv.hpp
+    src/date.cpp
 )
 
 # Add any additional include directories here
