@@ -11,13 +11,15 @@ set(SOURCES
     #src/option_mc.cpp
     #src/black_scholes.hpp
     main.cpp
+    # Header Files
     headers/options.h
     headers/rapidcsv.h
     headers/pricing_models.h
     headers/date.h
     headers/calendar.h
-    #src/rapidcsv.hpp
+    # Source Files
     src/date.cpp
+    src/calendar.cpp
 )
 
 # Add any additional include directories here

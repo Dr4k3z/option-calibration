@@ -12,13 +12,14 @@ int main(){
 
        cal.getHolidays();
 
-       Date day1 = Date::create(2024,8,13);
+       Date day1 = Date::create(2024,1,1);
        Date day2 = Date::create(2024,7,15);
-       Date day3 = Date::create(2024,12,25);
+       Date day3 = Date::create(2024,12,31);
        
-       std::cout << cal.isHoliday(day1) << std::endl;
-       std::cout << cal.isHoliday(day2) << std::endl;
-       std::cout << cal.isHoliday(day3) << std::endl;
+       day1.print(true);
+       day3.print(true);
+       std::cout << "Trading Days: " << cal.tradingDays(day1,day3) << std::endl;
+
        /*day1.print(true);
        day2.print(true);
        ++day1;

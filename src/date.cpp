@@ -38,13 +38,13 @@ bool Date::isLeapYear() const{
        return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
 }
 
-bool Date::isWeekend(){
-       if (weekday==UNKNOWN){ initializeWeekDay(); }
+bool Date::isWeekend() const{
+       //if (weekday==UNKNOWN){ initializeWeekDay(); } this is no longer required
 
        if (weekday==Sunday || weekday==Saturday){
-              return false;
+              return true;
        }
-       return true;
+       return false;
 }
 
 // This function only works with dates after 2018
@@ -183,5 +183,22 @@ void Date::print(bool format){
               std::cout << day_name() << " " << day << "th " << month_name() << " " << year << std::endl;
        }else{
               std::cout << year << "/" << month << "/" << day << std::endl;
+       }
+}
+
+// Not very elegant I know
+Date Date::max(const Date& p1, const Date& p2){
+       if (p1 > p2){
+              return p1;
+       }else{
+              return p2;
+       }
+}
+
+Date Date::min(const Date& p1, const Date& p2){
+       if (p1 < p2){
+              return p1;
+       }else{
+              return p2;
        }
 }

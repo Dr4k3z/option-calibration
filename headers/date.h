@@ -8,7 +8,6 @@
        For most of the methods implementation, refer to date.cpp
 */
 
-
 #include <string>
 #include <iostream>
 #include <vector>
@@ -75,7 +74,7 @@ public:
        Date &operator=(const Date& p);
 
        bool isLeapYear() const;
-       bool isWeekend();
+       bool isWeekend() const;
 
        //--------------------
        // Methods for visualization
@@ -89,6 +88,8 @@ public:
        int dayDifference(const Date& p, bool trading = true);
        void add(int days);
        void subtract(int days);
+       static Date max(const Date& p1, const Date& p2);
+       static Date min(const Date& p1, const Date& p2);
 
        //--------------------
        // Methods for importing and format change

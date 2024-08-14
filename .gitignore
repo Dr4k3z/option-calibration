@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+option-calibration
 
 #cmake
 CMakeLists.txt.user
