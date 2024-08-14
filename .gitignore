@@ -32,6 +32,9 @@
 *.app
 option-calibration
 
+# VsCode
+.vscode
+
 #cmake
 CMakeLists.txt.user
 CMakeCache.txt

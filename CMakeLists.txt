@@ -20,6 +20,7 @@ set(SOURCES
     # Source Files
     src/date.cpp
     src/calendar.cpp
+    src/options.cpp
 )
 
 # Add any additional include directories here

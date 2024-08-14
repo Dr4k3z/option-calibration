@@ -24,11 +24,11 @@ public:
 
        //--------------------
        //Binary Checking methods
-       bool isHoliday(const Date& p){
+       bool isHoliday(const Date& p) const{
               return std::find(holidays.begin(), holidays.end(), p)!=holidays.end();
        }
 
-       bool isTradingDay(const Date& p){
+       bool isTradingDay(const Date& p) const{
               if (p.isWeekend() || isHoliday(p)){
                      return false;
               }else{
@@ -38,7 +38,7 @@ public:
 
        //---------------------
        //Methods for computations
-       int tradingDays(const Date& p1, const Date& p2);
+       int tradingDays(const Date& p1, const Date& p2) const;
 };
 
 #endif

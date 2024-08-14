@@ -3,6 +3,10 @@
 
 #include <iostream>
 #include <algorithm> 
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <ostream>
 
 Date::Date(std::string datetime){
        std::stringstream ss(datetime);
@@ -19,6 +23,11 @@ Date::Date(std::string datetime){
        // Extract day
        std::getline(ss, token, '/');
        day = std::stoi(token);
+
+       // How to manage possibile errors in reading dates?
+       if (day > 31 || month > 12 || year < 0){
+              throw std::runtime_error("Error reading dates from string!");
+       }
 
        weekday = UNKNOWN;
 }
@@ -202,3 +211,12 @@ Date Date::min(const Date& p1, const Date& p2){
               return p2;
        }
 }
+
+Date Date::today(){
+       auto now = std::chrono::system_clock::now();
+       std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+       std::tm* local_time = std::localtime(&now_time);
+       std::ostringstream oss;
+       oss << std::put_time(local_time, "%Y/%m/%d");
+       return Date::create(oss.str());
+}      

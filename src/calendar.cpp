@@ -10,7 +10,9 @@ void Calendar::loadHolidaysFromCsv(std::string filename){
        }
 }
 
-int Calendar::tradingDays(const Date& p1, const Date& p2){
+// Figure out a way to handle negative trading days,
+// I mean return a minus or something
+int Calendar::tradingDays(const Date& p1, const Date& p2) const{
        Date p = Date::max(p1,p2);
        Date q = Date::min(p1,p2);
        if (p == q){

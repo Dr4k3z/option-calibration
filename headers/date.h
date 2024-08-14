@@ -90,6 +90,7 @@ public:
        void subtract(int days);
        static Date max(const Date& p1, const Date& p2);
        static Date min(const Date& p1, const Date& p2);
+       static Date today();
 
        //--------------------
        // Methods for importing and format change
