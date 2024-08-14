@@ -34,14 +34,25 @@ int Date::dayDifference(const Date& p, bool trading){
        return diff(*this,p);
 }
 
-bool Date::isLeapYear(){
+bool Date::isLeapYear() const{
        return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
+}
+
+bool Date::isWeekend(){
+       if (weekday==UNKNOWN){ initializeWeekDay(); }
+
+       if (weekday==Sunday || weekday==Saturday){
+              return false;
+       }
+       return true;
 }
 
 // This function only works with dates after 2018
 void Date::initializeWeekDay(){
        int d = 1;
        Date begin(2018,1,1); // this date was a monday
+
+       //std::cout << "Initializationg of weekday..." << std::endl;
 
        for (;begin < *this; ++begin){
               if (d == 6){ d = 0; }
@@ -169,10 +180,6 @@ std::string Date::day_name() const{
 
 void Date::print(bool format){
        if (format){
-              if (weekday==UNKNOWN){
-                     initializeWeekDay();
-              }
-
               std::cout << day_name() << " " << day << "th " << month_name() << " " << year << std::endl;
        }else{
               std::cout << year << "/" << month << "/" << day << std::endl;

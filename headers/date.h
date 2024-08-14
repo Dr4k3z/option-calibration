@@ -1,5 +1,14 @@
 #ifndef __CppOptions__Date__
 #define __CppOptions__Date__
+
+/*
+       This class implements Date as tuple of year,month and day.
+       At the moment, it only works in the yy/mm/dd format. 
+       Instances of the class can be create only thru factory methods. 
+       For most of the methods implementation, refer to date.cpp
+*/
+
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -30,8 +39,6 @@ enum Month{
        December
 };
 
-class Calendar; //forward declaration
-
 class Date{
 private:
        int year;
@@ -39,16 +46,36 @@ private:
        int day;
        WeekDay weekday;
 
-       void initializeWeekDay();
-public:
-       // --------------------
-       // Constructors
+       //--------------------
+       //Private Constructos: objects instance can be created only thru factory methods
        Date(int year, int month, int day) : year(year), month(month), day(day), weekday(UNKNOWN) {}
-       Date(const Date& p) : year(p.year), month(p.month), day(p.day), weekday(p.weekday) {}
-       Date &operator=(const Date& p);
        Date(std::string datetime);
 
-       bool isLeapYear();
+       //--------------------
+       //The following methods initializes the weekday member. It's automatically called by the factory methods
+       void initializeWeekDay();
+public:
+       //--------------------
+       //Factory Methods
+       static Date create(int y, int m, int d){
+              Date factory(y,m,d);
+              factory.initializeWeekDay();
+              return factory;
+       }
+
+       static Date create(std::string datetime){
+              Date factory(datetime);
+              factory.initializeWeekDay();
+              return factory;
+       }
+
+       //--------------------
+       //Copy Constructor and Assignment Operator
+       Date(const Date& p) : year(p.year), month(p.month), day(p.day), weekday(p.weekday) {}
+       Date &operator=(const Date& p);
+
+       bool isLeapYear() const;
+       bool isWeekend();
 
        //--------------------
        // Methods for visualization

@@ -1,3 +1,6 @@
+#ifndef __CppOptions__Calendar__
+#define __CppOptions__Calendar__
+
 #include "Date.h"
 #include "rapidcsv.h"
 
@@ -12,7 +15,7 @@ public:
               rapidcsv::Document doc(filename);
               std::vector<std::string> col = doc.GetColumn<std::string>("Date");
               for (std::string str : col){
-                     Date d(str);
+                     Date d = Date::create(str);
                      d.print(true);
                      holidays.push_back(d);
               }
@@ -21,4 +24,14 @@ public:
        bool isHoliday(const Date& p){
               return std::find(holidays.begin(), holidays.end(), p)!=holidays.end();
        }
+
+       /*bool isTradingDay(const Date& p){
+              if (p.isWeekend() || isHoliday(p)){
+                     return false;
+              }else{
+                     return true;
+              }
+       }*/
 };
+
+#endif

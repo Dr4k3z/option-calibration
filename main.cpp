@@ -12,10 +12,10 @@ int main(){
 
        cal.getHolidays();
 
-       Date day1(2024,8,13);
-       Date day2(2024,7,15);
-       Date day3(2024,12,25);
-
+       Date day1 = Date::create(2024,8,13);
+       Date day2 = Date::create(2024,7,15);
+       Date day3 = Date::create(2024,12,25);
+       
        std::cout << cal.isHoliday(day1) << std::endl;
        std::cout << cal.isHoliday(day2) << std::endl;
        std::cout << cal.isHoliday(day3) << std::endl;
