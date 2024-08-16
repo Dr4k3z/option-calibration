@@ -21,6 +21,7 @@ set(SOURCES
     src/date.cpp
     src/calendar.cpp
     src/options.cpp
+    src/pricing_models.cpp
 )
 
 # Add any additional include directories here
