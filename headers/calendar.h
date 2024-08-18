@@ -12,15 +12,19 @@
 class Calendar{
 private:
        std::vector<Date> holidays;
+       std::vector<Date> readFromCsv(const std::string& filename);
 public:
        //--------------------
        //Configuration methods
-       void loadHolidaysFromCsv(std::string filename);
+       static Calendar createFromCsv(const std::string& finename);
+       inline void loadHolidaysFromCsv(const std::string& filename) { holidays = readFromCsv(filename); }
+       void addHoliday(const Date& d);
+       void removeHoliday(const std::string& holiday);
 
        //--------------------
        //Getters and Setters
        void setHolidays(const std::vector<Date>& p){ holidays = p; }
-       std::vector<Date> getHolidays() const{ return holidays; }
+       inline std::vector<Date> getHolidays() const{ return holidays; }
 
        //--------------------
        //Binary Checking methods
@@ -37,8 +41,9 @@ public:
        }
 
        //---------------------
-       //Methods for computations
+       //Methods for computations and visualisation
        int tradingDays(const Date& p1, const Date& p2) const;
+       void print() const;
 };
 
 #endif

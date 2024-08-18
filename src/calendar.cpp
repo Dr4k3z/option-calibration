@@ -1,13 +1,23 @@
 #include "../headers/calendar.h"
 
-void Calendar::loadHolidaysFromCsv(std::string filename){
+std::vector<Date> Calendar::readFromCsv(const std::string& filename){
        rapidcsv::Document doc(filename);
        std::vector<std::string> col = doc.GetColumn<std::string>("Date");
+       
+       std::vector<Date> res;
+
        for (std::string str : col){
               Date d = Date::create(str);
               //d.print(true);
-              holidays.push_back(d);
+              res.push_back(d);
        }
+       return res;
+}
+
+Calendar Calendar::createFromCsv(const std::string& filename){
+       Calendar cal;
+       cal.holidays = cal.readFromCsv(filename);
+       return cal;
 }
 
 // We assume p2 > p1
@@ -29,4 +39,11 @@ int Calendar::tradingDays(const Date& p1, const Date& p2) const{
        if (!isTradingDay(p2)){ counter--; }
 
        return counter;
+}
+
+void Calendar::print() const{
+       for(Date d : holidays){
+              d.print();
+              std::cout << std::endl;
+       }
 }

@@ -88,8 +88,8 @@ public:
        int dayDifference(const Date& p, bool trading = true);
        void add(int days);
        void subtract(int days);
-       static Date max(const Date& p1, const Date& p2);
-       static Date min(const Date& p1, const Date& p2);
+       inline static Date max(const Date& p1, const Date& p2);
+       inline static Date min(const Date& p1, const Date& p2);
        static Date today();
 
        //--------------------

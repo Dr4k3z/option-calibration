@@ -37,12 +37,12 @@ public:
 
        //--------------------
        //Getters
-       float getStrike() const{ return strike; }
-       Type getType() const{ return type; }
+       inline float getStrike() const{ return strike; }
+       inline Type getType() const{ return type; }
 
        //--------------------
        //Date management methods
-       float time2maturity(Units unit = Days) const;
+       float time2maturity(Units unit = Years) const;
 
        //--------------------
        //Virtual Methods
@@ -52,8 +52,8 @@ public:
 class EuropeanCallOption : public EuropeanOption{
 public:
        EuropeanCallOption(float strike, Date expiry_date, Calendar cal) : EuropeanOption(strike,expiry_date, cal, Call) {}
-       
-       float payoff(float stock) const{
+
+       inline float payoff(float stock) const override{
               return std::max({stock-strike,0.0f});
        }
 };
@@ -62,7 +62,7 @@ class EuropeanPutOption : public EuropeanOption{
 public:
        EuropeanPutOption(float strike, Date expiry_date, Calendar cal) : EuropeanOption(strike, expiry_date, cal, Put) {}
 
-       float payoff(float stock) const{
+       inline float payoff(float stock) const override{
               return std::max({strike-stock,0.0f});
        }
 };

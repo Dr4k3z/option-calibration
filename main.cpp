@@ -11,14 +11,18 @@ int main(){
        std::cout << call.payoff(110.0) << std::endl;
        std::cout << put.payoff(80) << std::endl;*/
        Date expiryDate = Date::create(2024,12,31);
-       Calendar cal; cal.loadHolidaysFromCsv("/mnt/c/Users/matte/Documents/option-calibration/resources/us_holidays.csv");
+       Calendar cal = Calendar::createFromCsv("/mnt/c/Users/matte/Documents/option-calibration/resources/us_holidays.csv");
 
        EuropeanCallOption call(100,expiryDate,cal);
        EuropeanPutOption put(100,expiryDate,cal);
 
-       std::cout << "Call = " << BS::price(call,100,0.2,0.05) << std::endl;
-       std::cout << "Put = " << BS::price(put,100,0.2,0.05) << std::endl;
+       std::cout << "Call BS = " << BlackScholes::price(call,100,0.2,0.05) << std::endl;
+       std::cout << "Put BS = " << BlackScholes::price(put,100,0.2,0.05) << std::endl;
+       
+       std::cout << "--------------------" << std::endl;
 
+       std::cout << "Call CRR = " << CRR::price(call,100,0.2,0.05) << std::endl;
+       std::cout << "Put CRR = " << CRR::price(put,100,0.2,0.05) << std::endl; 
        /*day1.print(true);
        day2.print(true);
        ++day1;
