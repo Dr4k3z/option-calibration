@@ -32,7 +32,7 @@ int main(){
        EuropeanPutOption put(1,expiryDate,cal); put.setValueDate(valueDate);
 
        // Price using different methods
-       /*std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
+       std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
        std::cout << "Put BS = " << BlackScholes::price(put,1,0.22,0.03) << std::endl;
        
        std::cout << "--------------------" << std::endl;
@@ -40,15 +40,8 @@ int main(){
        std::cout << "Call CRR(" << CRR::N << ") = " << CRR::price(call,1,0.22,0.03) << std::endl;
        std::cout << "Put CRR(" << CRR::N  << ") = " << CRR::price(put,1,0.22,0.03) << std::endl; 
 
-       std::cout << "--------------------" << std::endl;*/
+       std::cout << "--------------------" << std::endl;
 
        std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
-       
-       MC::N = 10000;
-       std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
-       
-       MC::N = 1000000;
-       std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
-       
-       //std::cout << "Put MC(" << MC::N << ") = " << MC::price(put,1,0.22,0.03) << std::endl;
+       std::cout << "Put MC(" << MC::N << ") = " << MC::price(put,1,0.22,0.03) << std::endl;
 }

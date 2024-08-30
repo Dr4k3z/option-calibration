@@ -242,12 +242,12 @@ float MC::price(const EuropeanOption& option, float S, float sigma, float rate){
        std::vector<float> stockPrice(N);
        for (int i=0;i<N;i++){
               float g = normalRand(engine);
-              stockPrice[i] = S*std::exp(-0.5*sigma*sigma*tmt + sigma *std::sqrt(tmt)*g);
+              stockPrice[i] = S*std::exp((rate-0.5*sigma*sigma)*tmt + sigma *std::sqrt(tmt)*g);
        }
 
        float mean;
        for (float s : stockPrice){
-              mean += option.payoff(s);
+              mean += std::exp(-rate*tmt)*option.payoff(s);
        }
        mean = mean/float(N);
        return mean;
