@@ -1,8 +1,7 @@
 #include "../headers/options.h"
 
 float EuropeanOption::time2maturity(Units unit) const{
-       Date t = Date::today();
-       int tmt = cal.tradingDays(t,expiry_date);
+       int tmt = cal.tradingDays(value_date, expiry_date);
        switch (unit){
        case Days:
               return tmt;
@@ -11,6 +10,6 @@ float EuropeanOption::time2maturity(Units unit) const{
        case Years:
               return tmt/365.0;
        default:
-              return cal.tradingDays(t,expiry_date);
+              return cal.tradingDays(value_date, expiry_date);
        }
 }

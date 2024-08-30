@@ -5,27 +5,50 @@
 #include "headers/options.h"
 #include "headers/pricing_models.h"
 
+/*
+       Price a European Options with the following characteristics:
+       strike = 1 euro
+       value date = 2024-02-15
+       maturity = 3 months
+       volatility = 0.22
+       rate = 0.03
+       dividen = 0.06  how do you quote options with dividend?
+       settlement = physical delivery
+       n contracts = 1 mln
+       underlying = 1 euro
+*/
+
+
 int main(){
-       /*EuropeanCallOption call(100.0,0.1);
-       EuropeanPutOption put(100.0,0.1);
-       std::cout << call.payoff(110.0) << std::endl;
-       std::cout << put.payoff(80) << std::endl;*/
-       Date expiryDate = Date::create(2024,12,31);
+       // Create a Calendar object to specify holidays. We use 2024 US financial holidays
        Calendar cal = Calendar::createFromCsv("/mnt/c/Users/matte/Documents/option-calibration/resources/us_holidays.csv");
 
-       EuropeanCallOption call(100,expiryDate,cal);
-       EuropeanPutOption put(100,expiryDate,cal);
+       // Set call value and expiry date
+       Date valueDate = Date::create(2024,2,15);
+       Date expiryDate = Date::create(2024,5,15);
 
-       std::cout << "Call BS = " << BlackScholes::price(call,100,0.2,0.05) << std::endl;
-       std::cout << "Put BS = " << BlackScholes::price(put,100,0.2,0.05) << std::endl;
+       // Create european options
+       EuropeanCallOption call(1,expiryDate,cal); call.setValueDate(valueDate);
+       EuropeanPutOption put(1,expiryDate,cal); put.setValueDate(valueDate);
+
+       // Price using different methods
+       /*std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
+       std::cout << "Put BS = " << BlackScholes::price(put,1,0.22,0.03) << std::endl;
        
        std::cout << "--------------------" << std::endl;
 
-       std::cout << "Call CRR = " << CRR::price(call,100,0.2,0.05) << std::endl;
-       std::cout << "Put CRR = " << CRR::price(put,100,0.2,0.05) << std::endl; 
-       /*day1.print(true);
-       day2.print(true);
-       ++day1;
-       day1.print();
-       day1.print(true); */ 
+       std::cout << "Call CRR(" << CRR::N << ") = " << CRR::price(call,1,0.22,0.03) << std::endl;
+       std::cout << "Put CRR(" << CRR::N  << ") = " << CRR::price(put,1,0.22,0.03) << std::endl; 
+
+       std::cout << "--------------------" << std::endl;*/
+
+       std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
+       
+       MC::N = 10000;
+       std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
+       
+       MC::N = 1000000;
+       std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
+       
+       //std::cout << "Put MC(" << MC::N << ") = " << MC::price(put,1,0.22,0.03) << std::endl;
 }

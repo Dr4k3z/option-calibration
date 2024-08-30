@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <random>
 #include <cassert>
 
 //--------------------
@@ -86,7 +87,43 @@ float BlackScholes::price(const EuropeanOption& option, float S, float sigma, fl
        }
 }
 
+float BlackScholes::price(const EuropeanOption& option, float S, float tmt, float sigma, float rate){
+       float K = option.getStrike();
 
+       float d1 = (std::log(S/K)+(rate+0.5*sigma*sigma)*tmt)/(sigma*std::sqrt(tmt));
+       float d2 = d1-sigma*std::sqrt(tmt);
+
+       // Honestly I just wanted to play with dynamic casting, It could've been done way easier
+       if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
+              //std::cout << "this is a call" << std::endl;
+              return normalCDF(d1)*S-normalCDF(d2)*K*exp(-rate*tmt);       
+       }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
+              //std::cout << "this is a put" << std::endl;
+              return K*std::exp(-rate*tmt)*normalCDF(-d2) - S*normalCDF(-d1);
+       }else{
+              throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
+       }
+}
+
+//--------------------
+//Black76 namespace
+float Black76::price(const EuropeanOption& option, float S, float sigma, float rate){
+       float tmt = option.time2maturity();
+       float K = option.getStrike();
+
+       float d1 = (std::log(S/K)+(0.5*sigma*sigma)*tmt)/(sigma*std::sqrt(tmt));
+       float d2 = d1-sigma*std::sqrt(tmt);
+
+       if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
+              //std::cout << "this is a call" << std::endl;
+              return std::exp(-rate*tmt)*(normalCDF(d1)*S-normalCDF(d2)*K);       
+       }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
+              //std::cout << "this is a put" << std::endl;
+              return std::exp(-rate*tmt)*(K*normalCDF(-d2) - S*normalCDF(-d1));
+       }else{
+              throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
+       }
+}
 
 //--------------------
 //CRR namespace
@@ -185,4 +222,33 @@ float CRR::price(const EuropeanOption& option, float S, float sigma, float rate)
        }
 
        return price[0];
+}
+
+
+//--------------------
+//MC namespace
+
+// put price is way off
+
+int MC::N = 100;
+float MC::price(const EuropeanOption& option, float S, float sigma, float rate){
+       float strike = option.getStrike();
+       float tmt = option.time2maturity();
+              
+       // Random numbers from standard gaussian
+       std::default_random_engine engine;
+       std::normal_distribution<float> normalRand;
+
+       std::vector<float> stockPrice(N);
+       for (int i=0;i<N;i++){
+              float g = normalRand(engine);
+              stockPrice[i] = S*std::exp(-0.5*sigma*sigma*tmt + sigma *std::sqrt(tmt)*g);
+       }
+
+       float mean;
+       for (float s : stockPrice){
+              mean += option.payoff(s);
+       }
+       mean = mean/float(N);
+       return mean;
 }

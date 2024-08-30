@@ -15,17 +15,27 @@
 
 namespace BlackScholes{
        float price(const EuropeanOption& option, float S, float sigma, float rate);
+       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate); // non-calendarized time to maturity
        float impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice);
 };
+
+namespace Black76{
+       float price(const EuropeanOption& option, float S, float sigma, float rate);
+       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate); // todo
+}
 
 namespace CRR{
        extern int N; // defalt number of time steps // maybe try inline vs extern
        float price(const EuropeanOption& option, float S, float sigma, float rate);
+       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate); // todo
+
        float impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice);
 };
 
 namespace MC{
-       float price(const EuropeanOption& option, float S, float rate);
+       extern int N;
+       float price(const EuropeanOption& option, float S, float sigma, float rate);
+       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate); // todo
        float impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice);
 };
 
