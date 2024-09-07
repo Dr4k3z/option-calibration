@@ -17,11 +17,13 @@ set(SOURCES
     headers/pricing_models.h
     headers/date.h
     headers/calendar.h
+    headers/pde.h
     # Source Files
     src/date.cpp
     src/calendar.cpp
     src/options.cpp
     src/pricing_models.cpp
+    src/pde.cpp
 )
 
 # Add any additional include directories here

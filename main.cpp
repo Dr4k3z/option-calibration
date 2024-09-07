@@ -4,6 +4,7 @@
 #include "headers/calendar.h"
 #include "headers/options.h"
 #include "headers/pricing_models.h"
+#include "headers/pde.h"
 
 /*
        Price a European Options with the following characteristics:
@@ -32,7 +33,7 @@ int main(){
        EuropeanPutOption put(1,expiryDate,cal); put.setValueDate(valueDate);
 
        // Price using different methods
-       std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
+       /*std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
        std::cout << "Put BS = " << BlackScholes::price(put,1,0.22,0.03) << std::endl;
        
        std::cout << "--------------------" << std::endl;
@@ -43,5 +44,7 @@ int main(){
        std::cout << "--------------------" << std::endl;
 
        std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
-       std::cout << "Put MC(" << MC::N << ") = " << MC::price(put,1,0.22,0.03) << std::endl;
+       std::cout << "Put MC(" << MC::N << ") = " << MC::price(put,1,0.22,0.03) << std::endl;*/
+       BlackScholesPDE eqt = BlackScholesPDE::create(&call);
+       eqt.boundary_right(0,0);
 }
