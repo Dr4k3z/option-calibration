@@ -4,11 +4,21 @@
 #include <numeric>
 #include <random>
 #include <cassert>
+#include <functional>
 
 //--------------------
 /*Here goes a list a various useful functions that are called throughtout
   the file. Some are called by a singular namespace, some arent. It doesnt feel
   very clean and organized, I wanna find another solution to that.*/
+
+// thanks to @Tony the Lion from stackoverflow for this warning class
+class warning : public std::exception{
+public:
+     warning(const std::string& msg) {}
+     const char* what() { return msg.c_str(); } //message of warning
+private:
+     std::string msg;
+};
 
 float normalCDF(float value, float mean=0, float std = 1){
        // Normal Distribution
@@ -62,6 +72,43 @@ void print(std::vector<T> v){
        std::cout << std::endl;
 }
 
+template<typename T>
+float bisectionMethod(std::function<T(T)> func, T x0, T xmax, T tol){
+       // Bisection method to find the root of a function
+       unsigned long maxIter = 10*9;       
+
+       T fa = func(x0);
+       T fb = func(xmax);
+
+       if (fa*fb > 0){
+              throw std::runtime_error("The function must have different signs at the interval ends");
+       }
+
+       T c = x0;
+       unsigned long iter = 0;
+       while ((xmax-x0) > tol && iter < maxIter){
+              c = (x0+xmax)/2.0;
+
+              if (std::fabs(func(c)) < tol){
+                     break;
+              }
+              
+              if (func(x0)*func(c) < 0){
+                     xmax = c;
+              }else{
+                     x0 = c;
+              }
+              iter++;
+       }
+
+       //std::cout << "Bisection method converged in " << iter << " iterations\n";
+
+       if (iter >= maxIter){
+              throw warning("Bisection method did not converge");
+       }
+       return c;
+}
+
 //--------------------
 //BlackScholes namespace
 float BlackScholes::price(const EuropeanOption& option, float S, float sigma, float rate){
@@ -105,6 +152,20 @@ float BlackScholes::price(const EuropeanOption& option, float S, float tmt, floa
        }
 }
 
+// I dont like the fact that I have two different functions for implied volatility
+float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice){
+       auto func = [&option,S,rate,marketPrice](float x){return BlackScholes::price(option,S,x,rate)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
+}
+
+float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice){
+       auto func = [&option,S,tmt,rate,marketPrice](float x){return BlackScholes::price(option,S,tmt,x,rate)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
+}
+
+
 //--------------------
 //Black76 namespace
 float Black76::price(const EuropeanOption& option, float S, float sigma, float rate){
@@ -128,81 +189,19 @@ float Black76::price(const EuropeanOption& option, float S, float sigma, float r
 //--------------------
 //CRR namespace
 int CRR::N = 100;
-/*
-float CRR::price(const EuropeanOption& option, float S, float sigma, float rate){
-       I found this algorithm here: 
-       Nine Ways to Implement the Binomial Method for
-       Option Valuation in MATLAB - Desmond J. Higham
-       I'm not really sure what's going on 
-       
-
-       float K = option.getStrike();
-       float deltaT = option.time2maturity()/CRR::N;
-
-       std::cout << option.time2maturity() << std::endl;
-
-       // Cox-Ross-Rubenstein Model assumptions
-       float up = std::exp(sigma*deltaT); float down = 1/up;
-       float q = (std::exp(rate*deltaT)-down)/(up-down); //risk neutral probability
-
-       std::cout << "deltaT: " << deltaT << std::endl;
-       std::cout << "up: " << up << std::endl;
-       std::cout << "down: " << down << std::endl;
-       std::cout << "risk-neutral: " << q << std::endl;
-
-       int z = std::max(1, std::min(CRR::N + 1, static_cast<int>(std::floor(std::log((K * up) / (S * std::pow(down, N + 1))) / std::log(up / down)))));
-
-       // Calculate W
-       std::vector<float> W(z);
-       for (int i = 0; i < z; ++i) {
-              W[i] = K - S * std::pow(down, CRR::N - i) * std::pow(up, i);
-       }
-
-       // Calculate tmp1
-       std::vector<float> seq1 = linspace(1, CRR::N - z + 2);
-       std::vector<float> log_seq1(seq1.size());
-       for (size_t i = 0; i < seq1.size(); ++i) {
-              log_seq1[i] = std::log(seq1[i]);
-       }
-
-       std::vector<float> seq2 = linspace(1, z - 1);
-       std::vector<float> log_seq2(seq2.size());
-       for (size_t i = 0; i < seq2.size(); ++i) {
-              log_seq2[i] = std::log(seq2[i]);
-       }
-
-       std::vector<float> tmp1 = cumsum(log_seq1);
-       std::vector<float> tmp_sub = cumsum(log_seq2);
-
-       for (size_t i = 0; i < tmp1.size(); ++i) {
-              tmp1[i] -= (i < tmp_sub.size() ? tmp_sub[i] : 0);
-       }
-
-       // Calculate tmp2
-       std::vector<float> tmp3 = linspace(0, z - 1);
-       std::vector<float> tmp4 = linspace(CRR::N, CRR::N - z + 1, -1);
-
-       std::vector<float> tmp2(z);
-
-       for (int i = 0; i < z; ++i) {
-              std::cout << tmp1[i] << " " << tmp3[i] << " " << tmp4[i] << std::endl;
-              tmp2[i] = tmp1[i] + std::log(1-q) * tmp3[i] + std::log(q) * tmp4[i]; //this line doesn't work
-       }
-
-       float value = 0.0;
-       for (int i = 0; i < z; ++i) {
-              value += std::exp(tmp2[i]) * W[i];
-              std::cout << i << " " << W[i] << " " << tmp2[i] << " " << value << std::endl;
-       }
-
-
-       value *= std::exp(-rate * option.time2maturity());
-       return value;
-}*/
 
 float CRR::price(const EuropeanOption& option, float S, float sigma, float rate){
+       /*
+              If the volatility is zero, this function currently underflows to -NAN. 
+              To fix this, we implement the following edge case
+       */
+
        float strike = option.getStrike();
        float tmt = option.time2maturity();
+
+       if (sigma == 0){
+              return std::exp(-rate*tmt)*option.payoff(S);
+       }
 
        float deltaT = tmt/N; //time step
        float up = std::exp(sigma*std::sqrt(deltaT)); float down = 1/up; //for a derivation of these, see Cox,Ross,Rubenstein original paper
@@ -224,11 +223,48 @@ float CRR::price(const EuropeanOption& option, float S, float sigma, float rate)
        return price[0];
 }
 
+float CRR::price(const EuropeanOption& option, float S, float tmt, float sigma, float rate){
+       float strike = option.getStrike();
+
+       // edge case
+       if (sigma == 0){
+              return std::exp(-rate*tmt)*option.payoff(S);
+       }
+
+       float deltaT = tmt/N; //time step
+       float up = std::exp(sigma*std::sqrt(deltaT)); float down = 1/up; //for a derivation of these, see Cox,Ross,Rubenstein original paper
+
+       float q = (std::exp(rate*deltaT)-down)/(up-down); //Risk neutral measure
+
+       std::vector<float> price(N+1);
+       for (int i = 0; i <= N; i++){
+              price[i] = option.payoff(S*pow(up, N-2*i));
+       }
+
+       // Code written by ChatGPT - hope it works
+       for (int j = N; j >= 1; --j) {
+              for (int i = 0; i < j; ++i) {
+                     price[i] = exp(-rate * deltaT) * (q * price[i] + (1 - q) * price[i + 1]);
+              }
+       }
+
+       return price[0];
+}
+
+float CRR::impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice){
+       auto func = [&option,S,rate,marketPrice](float x){return CRR::price(option,S,x,rate)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
+}
+
+float CRR::impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice){
+       auto func = [&option,S,tmt,rate,marketPrice](float x){return CRR::price(option,S,tmt,x,rate)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
+}
 
 //--------------------
 //MC namespace
-
-// put price is way off
 
 int MC::N = 100;
 float MC::price(const EuropeanOption& option, float S, float sigma, float rate){
@@ -251,4 +287,38 @@ float MC::price(const EuropeanOption& option, float S, float sigma, float rate){
        }
        mean = mean/float(N);
        return mean;
+}
+
+float MC::price(const EuropeanOption& option, float S, float tmt, float sigma, float rate){
+       float strike = option.getStrike();
+              
+       // Random numbers from standard gaussian
+       std::default_random_engine engine;
+       std::normal_distribution<float> normalRand;
+
+       std::vector<float> stockPrice(N);
+       for (int i=0;i<N;i++){
+              float g = normalRand(engine);
+              stockPrice[i] = S*std::exp((rate-0.5*sigma*sigma)*tmt + sigma *std::sqrt(tmt)*g);
+       }
+
+       float mean;
+       for (float s : stockPrice){
+              mean += std::exp(-rate*tmt)*option.payoff(s);
+       }
+       mean = mean/float(N);
+       return mean;
+}
+
+// these two do not work, I need to find a way to make them work
+float MC::impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice){
+       auto func = [&option,S,rate,marketPrice](float x){return MC::price(option,S,x,rate)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
+}
+
+float MC::impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice){
+       auto func = [&option,S,tmt,rate,marketPrice](float x){return MC::price(option,S,tmt,x,rate)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
 }

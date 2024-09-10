@@ -1,6 +1,7 @@
 #ifndef __PDE__H
 #define __PDE__H
 
+#include <memory>
 #include "options.h"
 
 class AdvDiffReactEquation{
@@ -27,7 +28,13 @@ private:
        BlackScholesPDE(const EuropeanOption* option, float volatility, float rate) : option(option), volatility(volatility), rate(rate) {}
 public:
        // Factory methods
-       static BlackScholesPDE create(const EuropeanOption* option, float volatility = 0, float rate = 0){ return BlackScholesPDE(option, volatility, rate); }
+       /*static std::unique_ptr<BlackScholesPDE> create(const EuropeanOption* option, float volatility = 0, float rate = 0){
+              // This syntax looks quite shite 
+              return std::unique_ptr<BlackScholesPDE>(new BlackScholesPDE(option, volatility, rate));
+       }*/
+       static BlackScholesPDE* create(const EuropeanOption* option, float volatility = 0, float rate = 0){
+              return new BlackScholesPDE(option, volatility, rate);
+       }
 
        // Getters
        inline float getVolatility(){ return volatility; }

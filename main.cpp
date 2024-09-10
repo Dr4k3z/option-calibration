@@ -5,19 +5,9 @@
 #include "headers/options.h"
 #include "headers/pricing_models.h"
 #include "headers/pde.h"
+#include "headers/solve.h"
 
-/*
-       Price a European Options with the following characteristics:
-       strike = 1 euro
-       value date = 2024-02-15
-       maturity = 3 months
-       volatility = 0.22
-       rate = 0.03
-       dividen = 0.06  how do you quote options with dividend?
-       settlement = physical delivery
-       n contracts = 1 mln
-       underlying = 1 euro
-*/
+
 
 
 int main(){
@@ -33,18 +23,31 @@ int main(){
        EuropeanPutOption put(1,expiryDate,cal); put.setValueDate(valueDate);
 
        // Price using different methods
-       /*std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
-       std::cout << "Put BS = " << BlackScholes::price(put,1,0.22,0.03) << std::endl;
-       
+       std::cout << "Call BS = " << BlackScholes::price(call,1,0.22,0.03) << std::endl;
+       std::cout << "Call CRR = " << CRR::price(call,1,0.22,0.03) << std::endl;
+
        std::cout << "--------------------" << std::endl;
 
-       std::cout << "Call CRR(" << CRR::N << ") = " << CRR::price(call,1,0.22,0.03) << std::endl;
+       std::cout << "ImpliedVol BS = " << BlackScholes::impliedVolatility(call,1,0.03,0.0389972) << std::endl;
+       std::cout << "ImpliedVol CRR = " << CRR::impliedVolatility(call,1,0.03,0.0389029) << std::endl;
+
+       /*std::cout << "Call CRR(" << CRR::N << ") = " << CRR::price(call,1,0.22,0.03) << std::endl;
        std::cout << "Put CRR(" << CRR::N  << ") = " << CRR::price(put,1,0.22,0.03) << std::endl; 
 
        std::cout << "--------------------" << std::endl;
 
        std::cout << "Call MC(" << MC::N << ") = " << MC::price(call,1,0.22,0.03) << std::endl;
        std::cout << "Put MC(" << MC::N << ") = " << MC::price(put,1,0.22,0.03) << std::endl;*/
-       BlackScholesPDE eqt = BlackScholesPDE::create(&call);
-       eqt.boundary_right(0,0);
+       /*BlackScholesPDE* eqt = BlackScholesPDE::create(&call);
+       
+       auto fdm = PDESolver::create<ForwardEulerMethod>(eqt);
+       auto fem = PDESolver::create<FiniteElementMethod>(eqt);
+
+       Eigen::MatrixXd uh(2,2);
+       uh(0,0) = 1;
+       uh(0,1) = 2;
+       uh(1,0) = 3;
+       uh(1,1) = 4;
+
+       std::cout << uh << std::endl;*/
 }

@@ -39,10 +39,10 @@ float BlackScholesPDE::boundary_right(float t, float x) const{
        is just approximated to zero
 */
        if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(this->option)){
-              std::cout << "this is a call" << std::endl;
+              //std::cout << "this is a call" << std::endl;
               return x - this->option->getStrike()*exp(-rate*(this->option->time2maturity()-t));
        }else if (const EuropeanPutOption* putOption = dynamic_cast<const EuropeanPutOption*>(this->option)){
-              std::cout << "this is a put" << std::endl;
+              //std::cout << "this is a put" << std::endl;
               return 0;
        }else{
               throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");

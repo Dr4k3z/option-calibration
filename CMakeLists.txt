@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 project(option-calibration)
 
-find_package(SQLite3 REQUIRED)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+include_directories(/mnt/c/Users/matte/Documents/eigen-3.4.0/eigen-3.4.0)
+
+#find_package(SQLite3 REQUIRED)
 
 # Add your source files here
 set(SOURCES
@@ -18,12 +23,14 @@ set(SOURCES
     headers/date.h
     headers/calendar.h
     headers/pde.h
+    headers/solve.h
     # Source Files
     src/date.cpp
     src/calendar.cpp
     src/options.cpp
     src/pricing_models.cpp
     src/pde.cpp
+    src/solve.cpp
 )
 
 # Add any additional include directories here
@@ -45,4 +52,5 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Link the libraries
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
-target_link_libraries(${PROJECT_NAME} SQLite::SQLite3)
+#target_link_libraries(${PROJECT_NAME} SQLite::SQLite3)
+target_link_libraries(${PROJECT_NAME} PRIVATE /mnt/c/Users/matte/Documents/eigen-3.4.0/eigen-3.4.0)
