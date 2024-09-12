@@ -44,6 +44,11 @@ public:
        //Methods for computations and visualisation
        int tradingDays(const Date& p1, const Date& p2) const;
        void print() const;
+
+       //---------------------
+       //Operator overloading
+       bool operator==(const Calendar& p) const;
+       bool operator!=(const Calendar& p) const;
 };
 
 #endif

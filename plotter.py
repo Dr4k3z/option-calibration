@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
+'''
 file_path = 'fd.csv'
 
 try:
@@ -12,4 +12,12 @@ try:
     #plt.plot(data.loc[1000])
     plt.show()
 except FileNotFoundError:
-    print(f"File '{file_path}' not found.")
+    print(f"File '{file_path}' not found.")'''
+
+df = pd.read_csv('implied_volatility.csv')
+
+df["DATA"] = 100*df["DATA"]
+
+plt.scatter(df["STRIKE"],df["DATA"])
+plt.ylim(0,100)
+plt.show()

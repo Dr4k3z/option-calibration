@@ -135,6 +135,15 @@ bool Date::operator==(const Date& p) const{
        return false;
 }
 
+bool Date::operator!=(const Date& p) const{
+       return !(*this == p);
+}
+
+std::ostream& operator<<(std::ostream& stream, const Date& date){
+       stream << date.year << "/" << date.month << "/" << date.day;
+       return stream;
+}
+
 Month int2Month(int i){
        switch (i){
               case 1: return January;

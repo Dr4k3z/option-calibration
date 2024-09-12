@@ -80,8 +80,10 @@ float bisectionMethod(std::function<T(T)> func, T x0, T xmax, T tol){
        T fa = func(x0);
        T fb = func(xmax);
 
+       // I dont like this way of handling errors and warnings
        if (fa*fb > 0){
-              throw std::runtime_error("The function must have different signs at the interval ends");
+              std::cout << "Warning! The function has the same sign at the endpoints of the interval\n";
+              return -1;
        }
 
        T c = x0;
@@ -111,60 +113,51 @@ float bisectionMethod(std::function<T(T)> func, T x0, T xmax, T tol){
 
 //--------------------
 //BlackScholes namespace
-float BlackScholes::price(const EuropeanOption& option, float S, float sigma, float rate){
-       /*
-              UNITS OF TIME MUST BE CONSISTENT, THINK OF SOMEWAY TO ENFORCE THAT
-       */
+float BlackScholes::price(const EuropeanOption& option, float S, float sigma, float rate, float tmt){
+       float K = option.getStrike();
+
+       if (tmt == 0.0){
+              tmt = option.time2maturity();
+       }
+
+       float d1 = (std::log(S/K)+(rate+0.5*sigma*sigma)*tmt)/(sigma*std::sqrt(tmt));
+       float d2 = d1-sigma*std::sqrt(tmt);
+
+       // Honestly I just wanted to play with dynamic casting, It could've been done way easier
+       if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
+              //std::cout << "this is a call" << std::endl;
+              return normalCDF(d1)*S-normalCDF(d2)*K*exp(-rate*tmt);       
+       }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
+              //std::cout << "this is a put" << std::endl;
+              return K*std::exp(-rate*tmt)*normalCDF(-d2) - S*normalCDF(-d1);
+       }else{
+              throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
+       }
+}
+
+float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt, float marketPrice){
+       if (marketPrice == 0){
+              marketPrice = option.getPrice();
+       }
+
+       auto func = [&option,S,tmt,rate,marketPrice](float x){return BlackScholes::price(option,S,x,rate,tmt)-marketPrice;};
+       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
+       return impliedVol;
+}
+
+std::vector<float> BlackScholes::calibrate(const OptionChain* chain, float S, float rate){
+       std::vector<float> impliedVol;
        
-       float tmt = option.time2maturity();
-       float K = option.getStrike();
-
-       float d1 = (std::log(S/K)+(rate+0.5*sigma*sigma)*tmt)/(sigma*std::sqrt(tmt));
-       float d2 = d1-sigma*std::sqrt(tmt);
-
-       // Honestly I just wanted to play with dynamic casting, It could've been done way easier
-       if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
-              //std::cout << "this is a call" << std::endl;
-              return normalCDF(d1)*S-normalCDF(d2)*K*exp(-rate*tmt);       
-       }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
-              //std::cout << "this is a put" << std::endl;
-              return K*std::exp(-rate*tmt)*normalCDF(-d2) - S*normalCDF(-d1);
-       }else{
-              throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
+       for (const auto& option : chain->getOptions()){
+              float tmt = option->time2maturity();
+              //float marketPrice = option->getPrice();
+              //float marketPrice = (option->getBidPrice()+option->getAskPrice())/2.0;
+              float marketPrice = option->getBidPrice(); // Bid or Ask?
+              float implied = BlackScholes::impliedVolatility(*option,S,rate,tmt,marketPrice);
+              impliedVol.push_back(implied);
        }
-}
-
-float BlackScholes::price(const EuropeanOption& option, float S, float tmt, float sigma, float rate){
-       float K = option.getStrike();
-
-       float d1 = (std::log(S/K)+(rate+0.5*sigma*sigma)*tmt)/(sigma*std::sqrt(tmt));
-       float d2 = d1-sigma*std::sqrt(tmt);
-
-       // Honestly I just wanted to play with dynamic casting, It could've been done way easier
-       if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
-              //std::cout << "this is a call" << std::endl;
-              return normalCDF(d1)*S-normalCDF(d2)*K*exp(-rate*tmt);       
-       }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
-              //std::cout << "this is a put" << std::endl;
-              return K*std::exp(-rate*tmt)*normalCDF(-d2) - S*normalCDF(-d1);
-       }else{
-              throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
-       }
-}
-
-// I dont like the fact that I have two different functions for implied volatility
-float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice){
-       auto func = [&option,S,rate,marketPrice](float x){return BlackScholes::price(option,S,x,rate)-marketPrice;};
-       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
        return impliedVol;
 }
-
-float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice){
-       auto func = [&option,S,tmt,rate,marketPrice](float x){return BlackScholes::price(option,S,tmt,x,rate)-marketPrice;};
-       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
-       return impliedVol;
-}
-
 
 //--------------------
 //Black76 namespace
@@ -190,41 +183,12 @@ float Black76::price(const EuropeanOption& option, float S, float sigma, float r
 //CRR namespace
 int CRR::N = 100;
 
-float CRR::price(const EuropeanOption& option, float S, float sigma, float rate){
-       /*
-              If the volatility is zero, this function currently underflows to -NAN. 
-              To fix this, we implement the following edge case
-       */
-
+float CRR::price(const EuropeanOption& option, float S, float sigma, float rate, float tmt){
        float strike = option.getStrike();
-       float tmt = option.time2maturity();
 
-       if (sigma == 0){
-              return std::exp(-rate*tmt)*option.payoff(S);
+       if (tmt == 0.0){
+              tmt = option.time2maturity();
        }
-
-       float deltaT = tmt/N; //time step
-       float up = std::exp(sigma*std::sqrt(deltaT)); float down = 1/up; //for a derivation of these, see Cox,Ross,Rubenstein original paper
-
-       float q = (std::exp(rate*deltaT)-down)/(up-down); //Risk neutral measure
-
-       std::vector<float> price(N+1);
-       for (int i = 0; i <= N; i++){
-              price[i] = option.payoff(S*pow(up, N-2*i));
-       }
-
-       // Code written by ChatGPT - hope it works
-       for (int j = N; j >= 1; --j) {
-              for (int i = 0; i < j; ++i) {
-                     price[i] = exp(-rate * deltaT) * (q * price[i] + (1 - q) * price[i + 1]);
-              }
-       }
-
-       return price[0];
-}
-
-float CRR::price(const EuropeanOption& option, float S, float tmt, float sigma, float rate){
-       float strike = option.getStrike();
 
        // edge case
        if (sigma == 0){
@@ -251,14 +215,11 @@ float CRR::price(const EuropeanOption& option, float S, float tmt, float sigma, 
        return price[0];
 }
 
-float CRR::impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice){
-       auto func = [&option,S,rate,marketPrice](float x){return CRR::price(option,S,x,rate)-marketPrice;};
-       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
-       return impliedVol;
-}
-
-float CRR::impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice){
-       auto func = [&option,S,tmt,rate,marketPrice](float x){return CRR::price(option,S,tmt,x,rate)-marketPrice;};
+float CRR::impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt, float marketPrice){
+       if (marketPrice == 0.0){
+              marketPrice = option.getPrice();
+       }
+       auto func = [&option,S,tmt,rate,marketPrice](float x){return CRR::price(option,S,x,rate,tmt)-marketPrice;};
        float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
        return impliedVol;
 }
@@ -267,31 +228,14 @@ float CRR::impliedVolatility(const EuropeanOption& option, float S, float tmt, f
 //MC namespace
 
 int MC::N = 100;
-float MC::price(const EuropeanOption& option, float S, float sigma, float rate){
-       float strike = option.getStrike();
-       float tmt = option.time2maturity();
-              
-       // Random numbers from standard gaussian
-       std::default_random_engine engine;
-       std::normal_distribution<float> normalRand;
-
-       std::vector<float> stockPrice(N);
-       for (int i=0;i<N;i++){
-              float g = normalRand(engine);
-              stockPrice[i] = S*std::exp((rate-0.5*sigma*sigma)*tmt + sigma *std::sqrt(tmt)*g);
-       }
-
-       float mean;
-       for (float s : stockPrice){
-              mean += std::exp(-rate*tmt)*option.payoff(s);
-       }
-       mean = mean/float(N);
-       return mean;
-}
 
 float MC::price(const EuropeanOption& option, float S, float tmt, float sigma, float rate){
        float strike = option.getStrike();
-              
+
+       if (tmt == 0.0){
+              tmt = option.time2maturity();
+       }
+
        // Random numbers from standard gaussian
        std::default_random_engine engine;
        std::normal_distribution<float> normalRand;
@@ -310,15 +254,13 @@ float MC::price(const EuropeanOption& option, float S, float tmt, float sigma, f
        return mean;
 }
 
-// these two do not work, I need to find a way to make them work
-float MC::impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice){
-       auto func = [&option,S,rate,marketPrice](float x){return MC::price(option,S,x,rate)-marketPrice;};
-       float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
-       return impliedVol;
-}
+// this does not work, I need to find a way to make them work
 
 float MC::impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice){
-       auto func = [&option,S,tmt,rate,marketPrice](float x){return MC::price(option,S,tmt,x,rate)-marketPrice;};
+       if (marketPrice == 0.0){
+              marketPrice = option.getPrice();
+       }
+       auto func = [&option,S,tmt,rate,marketPrice](float x){return MC::price(option,S,x,rate,tmt)-marketPrice;};
        float impliedVol = bisectionMethod<float>(func,0.0,1.0,0.0001);
        return impliedVol;
 }

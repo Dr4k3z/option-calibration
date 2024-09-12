@@ -47,3 +47,19 @@ void Calendar::print() const{
               std::cout << std::endl;
        }
 }
+
+bool Calendar::operator==(const Calendar& p) const{
+       size_t n = holidays.size();
+       assert(n == p.holidays.size() && "Warning! calendars have different number of holidays");
+
+       for (int i=0;i<n;i++){
+              if (holidays[i] != p.holidays[i]){
+                     return false;
+              }
+       }
+       return true;
+}
+
+bool Calendar::operator!=(const Calendar& p) const{
+       return !(*this == p);
+}

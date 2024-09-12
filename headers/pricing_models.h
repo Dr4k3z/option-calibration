@@ -14,10 +14,10 @@
 #include "options.h"
 
 namespace BlackScholes{
-       float price(const EuropeanOption& option, float S, float sigma, float rate);
-       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate); // non-calendarized time to maturity
-       float impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice);
-       float impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice); // non-calendarized time to maturity
+       float price(const EuropeanOption& option, float S, float sigma, float rate, float tmt=0.0); 
+       // I dont like the doulbe default value, I should find a way to avoid it
+       float impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt=0.0, float marketPrice=0.0); // non-calendarized time to maturity
+       std::vector<float> calibrate(const OptionChain* chain, float S, float rate);
 };
 
 namespace Black76{
@@ -27,19 +27,15 @@ namespace Black76{
 
 namespace CRR{
        extern int N; // defalt number of time steps // maybe try inline vs extern
-       float price(const EuropeanOption& option, float S, float sigma, float rate);
-       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate);
-       float impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice);
-       float impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice); // non-calendarized time to maturity
+       float price(const EuropeanOption& option, float S, float sigma, float rate, float tmt=0.0);
+       float impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt=0.0, float marketPrice=0.0); // non-calendarized time to maturity
 };
 
 namespace MC{
        extern int N;
-       float price(const EuropeanOption& option, float S, float sigma, float rate);
-       float price(const EuropeanOption& option, float S, float tmt, float sigma, float rate);
+       float price(const EuropeanOption& option, float S, float sigma, float rate, float tmt=0.0);
        // these two do not work, I need to implement a MC simulation
-       float impliedVolatility(const EuropeanOption& option, float S, float rate, float marketPrice);
-       float impliedVolatility(const EuropeanOption& option, float S, float tmt, float rate, float marketPrice); // non-calendarized time to maturity
+       float impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt=0.0, float marketPrice=0.0); // non-calendarized time to maturity
 };
 
 #endif

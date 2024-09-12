@@ -98,12 +98,14 @@ public:
        //--------------------
        // Operator overloading
        bool operator==(const Date& p) const;
+       bool operator!=(const Date& p) const;
        Date &operator+(int days);
        Date &operator++();
        Date &operator-(int days);
        Date &operator--();
        bool operator>(const Date& p) const;
        bool operator<(const Date& p) const;
+       friend std::ostream& operator<<(std::ostream& stream, const Date& date);
 
        ~Date() {}
 };
