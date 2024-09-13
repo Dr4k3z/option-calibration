@@ -5,6 +5,7 @@
 #include <random>
 #include <cassert>
 #include <functional>
+#include <fstream>
 
 //--------------------
 /*Here goes a list a various useful functions that are called throughtout
@@ -19,6 +20,17 @@ public:
 private:
      std::string msg;
 };
+
+/*class Warning{
+private:
+       std::string msg;
+public:
+       Warning(const std::string& msg) : msg(msg){}
+       friend std::ofstream& operator<<(std::ofstream& os, const Warning& w){
+              os << w.msg;
+              return os;
+       }
+};*/
 
 float normalCDF(float value, float mean=0, float std = 1){
        // Normal Distribution
@@ -83,8 +95,10 @@ float bisectionMethod(std::function<T(T)> func, T x0, T xmax, T tol){
        // I dont like this way of handling errors and warnings
        if (fa*fb > 0){
               std::cout << "Warning! The function has the same sign at the endpoints of the interval\n";
-              return -1;
+              return 0;
        }
+
+       //assert(fa*fb < 0 && "The function has the same sign at the endpoints of the interval");
 
        T c = x0;
        unsigned long iter = 0;
@@ -147,12 +161,10 @@ float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, flo
 
 std::vector<float> BlackScholes::calibrate(const OptionChain* chain, float S, float rate){
        std::vector<float> impliedVol;
-       
+       float tmt = chain->getTime2Maturity();
+
        for (const auto& option : chain->getOptions()){
-              float tmt = option->time2maturity();
-              //float marketPrice = option->getPrice();
-              //float marketPrice = (option->getBidPrice()+option->getAskPrice())/2.0;
-              float marketPrice = option->getBidPrice(); // Bid or Ask?
+              float marketPrice = option->getPrice();
               float implied = BlackScholes::impliedVolatility(*option,S,rate,tmt,marketPrice);
               impliedVol.push_back(implied);
        }

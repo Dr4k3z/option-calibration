@@ -7,6 +7,7 @@
 #include "headers/pde.h"
 #include "headers/solve.h"
 #include <algorithm>
+#include <chrono>
 
 template<typename T>
 void writeCsv(const std::string filename, const std::vector<T>& strikes, const std::vector<T>& data){
@@ -25,10 +26,19 @@ void writeCsv(const std::string filename, const std::vector<T>& strikes, const s
        file.close();
 }
 
-int main(){
+float measure_time_execution(std::function<void()> func){
+       auto start = std::chrono::high_resolution_clock::now();
+       func();
+       auto end = std::chrono::high_resolution_clock::now();
+       std::chrono::duration<float> duration = end-start;
+       return duration.count();
+}
+
+void func(){
        // Create a Calendar object to specify holidays. We use 2024 US financial holidays
-       Calendar cal = Calendar::createFromCsv("/mnt/c/Users/matte/Documents/option-calibration/resources/us_holidays.csv");
-       
+       //Calendar cal = Calendar::createFromCsv("/mnt/c/Users/matte/Documents/option-calibration/resources/us_holidays.csv");
+       Calendar cal = Calendar::noHolidays();
+
        Date valueDate = Date::create(2024,7,31);
        Date expiryDate = Date::create(2024,8,1);
        
@@ -40,6 +50,11 @@ int main(){
        std::vector<float> impliedVol = BlackScholes::calibrate(chain, S, rate);
        std::vector<float> strikes = chain->getStrikes();
        writeCsv<float>("implied_volatility.csv", strikes, impliedVol);
+}
 
+int main(){
+       auto f = [](){func();};
+       auto measure = measure_time_execution(f);
+       std::cout << "Execution time: " << measure << " seconds\n";
        return 0;
 }

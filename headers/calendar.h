@@ -17,6 +17,7 @@ public:
        //--------------------
        //Configuration methods
        static Calendar createFromCsv(const std::string& finename);
+       static Calendar noHolidays(){ return Calendar(); }
        inline void loadHolidaysFromCsv(const std::string& filename) { holidays = readFromCsv(filename); }
        void addHoliday(const Date& d);
        void removeHoliday(const std::string& holiday);

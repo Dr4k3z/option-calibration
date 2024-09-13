@@ -11,6 +11,11 @@ std::vector<Date> Calendar::readFromCsv(const std::string& filename){
               //d.print(true);
               res.push_back(d);
        }
+
+       if (res.size() == 0){
+              std::cout << "Warning! No holidays were read from the csv file\n";
+       }
+
        return res;
 }
 

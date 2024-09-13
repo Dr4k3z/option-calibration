@@ -16,8 +16,15 @@ except FileNotFoundError:
 
 df = pd.read_csv('implied_volatility.csv')
 
+market = pd.read_csv('resources/NIFTY_put_data_1_aug_2024.csv')
+market["IV"] = market["IV"].str.replace(',','').replace('-','0').astype(float)
+
 df["DATA"] = 100*df["DATA"]
 
-plt.scatter(df["STRIKE"],df["DATA"])
+plt.scatter(df["STRIKE"],df["DATA"],label="BS Implied")
+plt.scatter(df["STRIKE"],market["IV"],label="Market Implied")
 plt.ylim(0,100)
+plt.grid()
+plt.title("Market Implied Volatility")
+plt.legend()
 plt.show()

@@ -19,8 +19,19 @@ float EuropeanOption::time2maturity(Units unit) const{
 // Options chain methods
 
 float string2float(std::string str){
-       std::remove(str.begin(),str.end(),',');
-       return std::stof(str);
+       try{
+              std::remove(str.begin(),str.end(),',');
+
+              if (str == "-"){
+                     return 0;
+              }
+
+              return std::stof(str);
+       }catch (std::exception& e){
+              std::cerr << e.what() << "\n";
+              std::string errmsg = "Error with the following string:  "+str+"\n";
+              throw std::runtime_error(errmsg);
+       }
 }
 
 OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expiry_date, const Calendar& cal, const Type type, const std::string& filename){
@@ -29,6 +40,7 @@ OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expi
        try{
               rapidcsv::Document doc(filename);
               std::vector<std::string> strikes = doc.GetColumn<std::string>("STRIKE");
+              std::vector<std::string> prices = doc.GetColumn<std::string>("LTP"); // last traded price
               std::vector<std::string> bids = doc.GetColumn<std::string>("BID");
               std::vector<std::string> asks = doc.GetColumn<std::string>("ASK");
 
@@ -38,6 +50,7 @@ OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expi
 
               for (int i=0;i<n;i++){
                      float K = string2float(strikes[i]);
+                     float p = string2float(prices[i]);
                      float b = string2float(bids[i]);
                      float a = string2float(asks[i]);
 
@@ -49,7 +62,7 @@ OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expi
                             option = std::make_unique<EuropeanPutOption>(K, expiry_date, cal);
                      }
                      option->setValueDate(value_date); // I dont like this
-                     option->setBidPrice(b); option->setAskPrice(a);
+                     option->setPrice(p); option->setBidPrice(b); option->setAskPrice(a);
 
                      chain->options.push_back(std::move(option)); 
               }

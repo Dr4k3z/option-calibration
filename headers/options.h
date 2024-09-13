@@ -113,6 +113,9 @@ public:
        void loadOptionChain(const std::string& filename); // TODO
 
        // Getters
+       Date valueDate() const{ return value_date; }
+       Date getExpiryDate() const{ return expiry_date; }
+       float getTime2Maturity() const{ return options[0]->time2maturity(); }
        const std::vector<std::unique_ptr<EuropeanOption>>& getOptions() const{ return options; } // I dont like this getter, should return a reference
        std::vector<float> getStrikes() const;
 
