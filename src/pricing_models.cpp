@@ -127,7 +127,7 @@ float bisectionMethod(std::function<T(T)> func, T x0, T xmax, T tol){
 
 //--------------------
 //BlackScholes namespace
-float BlackScholes::price(const EuropeanOption& option, float S, float sigma, float rate, float tmt){
+float BlackScholes::price(const Option& option, float S, float sigma, float rate, float tmt){
        float K = option.getStrike();
 
        if (tmt == 0.0){
@@ -149,7 +149,7 @@ float BlackScholes::price(const EuropeanOption& option, float S, float sigma, fl
        }
 }
 
-float BlackScholes::impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt, float marketPrice){
+float BlackScholes::impliedVolatility(const Option& option, float S, float rate, float tmt, float marketPrice){
        if (marketPrice == 0){
               marketPrice = option.getPrice();
        }
@@ -165,6 +165,9 @@ std::vector<float> BlackScholes::calibrate(const OptionChain* chain, float S, fl
 
        for (const auto& option : chain->getOptions()){
               float marketPrice = option->getPrice();
+
+
+
               float implied = BlackScholes::impliedVolatility(*option,S,rate,tmt,marketPrice);
               impliedVol.push_back(implied);
        }

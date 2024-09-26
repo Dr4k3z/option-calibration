@@ -1,2 +1,0 @@
-#include "../headers/solve.h"
-

@@ -28,7 +28,7 @@ int main(){
        Date valueDate = Date::create(2024,7,31);
        Date expiryDate = Date::create(2024,8,1);
        
-       OptionChain* chain = OptionChain::createFromCsv(valueDate, expiryDate, cal, Put, "/mnt/c/Users/matte/Documents/option-calibration/resources/NIFTY_put_data_1_aug_2024.csv");
+       OptionChain* chain = OptionChain::createFromCsv(valueDate, expiryDate, cal, European, Put, "/mnt/c/Users/matte/Documents/option-calibration/resources/NIFTY_put_data_1_aug_2024.csv");
 
        float S = 24950.0; // NIFTY value at the 2024-7-31
        float rate = 0.1; // Risk-free rate

@@ -11,12 +11,12 @@
 
 #include "date.h"
 #include "calendar.h"
-#include "options.h"
+#include "options_european.h"
 
 namespace BlackScholes{
-       float price(const EuropeanOption& option, float S, float sigma, float rate, float tmt=0.0); 
+       float price(const Option& option, float S, float sigma, float rate, float tmt=0.0); 
        // I dont like the doulbe default value, I should find a way to avoid it
-       float impliedVolatility(const EuropeanOption& option, float S, float rate, float tmt=0.0, float marketPrice=0.0); // non-calendarized time to maturity
+       float impliedVolatility(const Option& option, float S, float rate, float tmt=0.0, float marketPrice=0.0); // non-calendarized time to maturity
        std::vector<float> calibrate(const OptionChain* chain, float S, float rate);
 };
 

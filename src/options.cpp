@@ -1,8 +1,10 @@
 #include "../headers/options.h"
+#include "../headers/options_european.h"
+#include "../headers/options_american.h"
 #include <cassert>
 #include <memory>
 
-float EuropeanOption::time2maturity(Units unit) const{
+float Option::time2maturity(Units unit) const{
        int tmt = cal.tradingDays(value_date, expiry_date);
        switch (unit){
        case Days:
@@ -34,8 +36,8 @@ float string2float(std::string str){
        }
 }
 
-OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expiry_date, const Calendar& cal, const Type type, const std::string& filename){
-       OptionChain* chain = new OptionChain(value_date, expiry_date,cal,type);
+OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expiry_date, const Calendar& cal, const OptionClass option_class,const OptionType type, const std::string& filename){
+       OptionChain* chain = new OptionChain(value_date, expiry_date, cal, option_class, type);
 
        try{
               rapidcsv::Document doc(filename);
@@ -55,12 +57,30 @@ OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expi
                      float a = string2float(asks[i]);
 
                      // I dont really like this part. Okay new there shouldn't be any memory leak, but still...
-                     std::unique_ptr<EuropeanOption> option;
+                     /*std::unique_ptr<Option> option;
                      if (type == Call){
                             option = std::make_unique<EuropeanCallOption>(K, expiry_date, cal);
                      }else{
                             option = std::make_unique<EuropeanPutOption>(K, expiry_date, cal);
+                     }*/
+
+
+                     // Remove nested ifs
+                     std::unique_ptr<Option> option;
+                     if (option_class == European){
+                            if (type == Call){
+                                   option = std::make_unique<EuropeanCallOption>(K, expiry_date, cal);
+                            }else{
+                                   option = std::make_unique<EuropeanPutOption>(K, expiry_date, cal);
+                            }
+                     }else if (option_class == American){
+                            if (type == Call){
+                                   option = std::make_unique<AmericanCallOption>(K, expiry_date, cal);
+                            }else{
+                                   option = std::make_unique<AmericanPutOption>(K, expiry_date, cal);
+                            }
                      }
+
                      option->setValueDate(value_date); // I dont like this
                      option->setPrice(p); option->setBidPrice(b); option->setAskPrice(a);
 
@@ -74,13 +94,16 @@ OptionChain* OptionChain::createFromCsv(const Date& value_date, const Date& expi
        }
 }
 
-void OptionChain::addOption(std::unique_ptr<EuropeanOption> option){
+void OptionChain::addOption(std::unique_ptr<Option> option){
        // check for expiry_date, calendar and type
        if (option->getExpiryDate() != expiry_date){
               throw std::invalid_argument("Option expiry date does not match chain expiry date");
        } 
        if (option->getCalendar() != cal){
               throw std::invalid_argument("Option calendar does not match chain calendar");
+       }
+       if (option->getClass() != option_class){
+              throw std::invalid_argument("Option class does not match chain class");
        }
        if (option->getType() != type){
               throw std::invalid_argument("Option type does not match chain type");
