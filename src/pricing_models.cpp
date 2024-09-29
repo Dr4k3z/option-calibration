@@ -32,8 +32,12 @@ public:
        }
 };*/
 
-float normalCDF(float value, float mean=0, float std = 1){
-       // Normal Distribution
+
+float Math::normalPDF(float value, float mean, float std){
+       return 1/(std::sqrt(2*M_PI)*std)*std::exp(-0.5*std::pow((value-mean)/std,2));
+}
+
+float Math::normalCDF(float value, float mean, float std){
        return 0.5 * (1.0 + std::erf((value - mean) / (std * std::sqrt(2.0))));
 }
 
@@ -127,25 +131,50 @@ float bisectionMethod(std::function<T(T)> func, T x0, T xmax, T tol){
 
 //--------------------
 //BlackScholes namespace
-float BlackScholes::price(const Option& option, float S, float sigma, float rate, float tmt){
+float BlackScholes::d1(const Option& option, float S, float sigma, float rate, float tmt){
        float K = option.getStrike();
 
        if (tmt == 0.0){
               tmt = option.time2maturity();
        }
 
-       float d1 = (std::log(S/K)+(rate+0.5*sigma*sigma)*tmt)/(sigma*std::sqrt(tmt));
-       float d2 = d1-sigma*std::sqrt(tmt);
+       return (std::log(S/K)+(rate+0.5*std::pow(sigma,2))*tmt)/(sigma*std::sqrt(tmt));
+}
 
-       // Honestly I just wanted to play with dynamic casting, It could've been done way easier
-       if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
-              //std::cout << "this is a call" << std::endl;
-              return normalCDF(d1)*S-normalCDF(d2)*K*exp(-rate*tmt);       
-       }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
-              //std::cout << "this is a put" << std::endl;
-              return K*std::exp(-rate*tmt)*normalCDF(-d2) - S*normalCDF(-d1);
-       }else{
-              throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
+float BlackScholes::d2(const Option& option, float S, float sigma, float rate, float tmt){
+       if (tmt = 0.0){
+              tmt = option.time2maturity();
+       }
+
+       return d1(option,S,sigma,rate,tmt)-sigma*std::sqrt(tmt);
+}
+
+float BlackScholes::price(const Option& option, float S, float sigma, float rate, float tmt){
+       // is it necessary?
+       if (option.getClass() != European){
+              std::cerr << "This function can only price european options!" << std::endl;
+       }
+
+       float K  = option.getStrike();
+       float d1 = BlackScholes::d1(option,S,sigma,rate,tmt);
+       float d2 = BlackScholes::d2(option,S,sigma,rate,tmt);
+
+       if (tmt == 0.0){
+              tmt = option.time2maturity();
+       }
+
+       std::cout << option.getType() << std::endl;
+
+       switch (option.getType())
+       {
+       case Call:
+              std::cout << "pricing a call\n";
+              return Math::normalCDF(d1)*S-Math::normalCDF(d2)*K*exp(-rate*tmt);
+       case Put:
+              std::cout << "pricing a put\n";
+              return K*std::exp(-rate*tmt)*Math::normalCDF(-d2) - S*Math::normalCDF(-d1);
+       default:
+              throw std::runtime_error("What the fuck have you just passed!\n");
        }
 }
 
@@ -165,9 +194,6 @@ std::vector<float> BlackScholes::calibrate(const OptionChain* chain, float S, fl
 
        for (const auto& option : chain->getOptions()){
               float marketPrice = option->getPrice();
-
-
-
               float implied = BlackScholes::impliedVolatility(*option,S,rate,tmt,marketPrice);
               impliedVol.push_back(implied);
        }
@@ -185,10 +211,10 @@ float Black76::price(const EuropeanOption& option, float S, float sigma, float r
 
        if (const EuropeanCallOption* callOption = dynamic_cast<const EuropeanCallOption*>(&option)){
               //std::cout << "this is a call" << std::endl;
-              return std::exp(-rate*tmt)*(normalCDF(d1)*S-normalCDF(d2)*K);       
+              return std::exp(-rate*tmt)*(Math::normalCDF(d1)*S-Math::normalCDF(d2)*K);       
        }else if (const EuropeanPutOption* callOption = dynamic_cast<const EuropeanPutOption*>(&option)){
               //std::cout << "this is a put" << std::endl;
-              return std::exp(-rate*tmt)*(K*normalCDF(-d2) - S*normalCDF(-d1));
+              return std::exp(-rate*tmt)*(K*Math::normalCDF(-d2) - S*Math::normalCDF(-d1));
        }else{
               throw std::runtime_error("price function unknown input parameters: only pass EuropeanOption objects");
        }

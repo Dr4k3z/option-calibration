@@ -27,6 +27,7 @@ set(SOURCES
     headers/options_american.h
     headers/rapidcsv.h
     headers/pricing_models.h
+    headers/greeks.h
     headers/date.h
     headers/calendar.h
     #headers/pde.h

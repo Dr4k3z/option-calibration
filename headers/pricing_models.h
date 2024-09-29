@@ -13,7 +13,14 @@
 #include "calendar.h"
 #include "options_european.h"
 
+namespace Math{
+       float normalPDF(float value, float mean=0.0, float std = 1.0);
+       float normalCDF(float value, float mean=0.0, float std = 1.0);
+}
+
 namespace BlackScholes{
+       float d1(const Option& option, float S, float sigma, float rate, float tmt=0.0);
+       float d2(const Option& option, float S, float sigma, float rate, float tmt=0.0);
        float price(const Option& option, float S, float sigma, float rate, float tmt=0.0); 
        // I dont like the doulbe default value, I should find a way to avoid it
        float impliedVolatility(const Option& option, float S, float rate, float tmt=0.0, float marketPrice=0.0); // non-calendarized time to maturity
