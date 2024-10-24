@@ -14,6 +14,7 @@ try:
 except FileNotFoundError:
     print(f"File '{file_path}' not found.")'''
 
+'''
 df = pd.read_csv('implied_volatility.csv')
 
 market = pd.read_csv('resources/NIFTY_put_data_1_aug_2024.csv')
@@ -28,3 +29,30 @@ plt.grid()
 plt.title("Market Implied Volatility")
 plt.legend()
 plt.show()
+'''
+
+df = pd.read_csv("delta_hedging.csv")
+df1 = pd.read_csv("no_hedge.csv")
+
+fig,ax = plt.subplots(1,1)
+
+ax.plot(df["Stock"],df["Option"],label="Delta Hedging")
+ax.plot(df1["Stock"],df1["Option"],label="No Hedge")
+ax.axvline(x=100, color='r', linestyle='--', label='Vertical Line')
+ax.legend()
+ax.grid()
+ax.set_title("Delta Hedging")
+
+plt.show()
+
+'''
+df = pd.read_csv("delta_hedging.csv")
+
+plt.plot(df["Stock"],label="Stock")
+plt.plot(df["Option"],label="Call")
+plt.plot(df["Portfolio"],label="Delta Neutral")
+plt.grid()
+plt.title("Delta Neutral Portoflio")
+plt.legend()
+plt.show()
+'''

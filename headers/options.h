@@ -1,6 +1,7 @@
 #ifndef __CppOptions__Options__
 #define __CppOptions__Options__
 
+#include <memory> // only for windows compilers
 #include "calendar.h"
 #include "date.h"
 

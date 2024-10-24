@@ -14,31 +14,24 @@ set(EXAMPLES
     examples/3-model_calibration.cpp
 )
 
-# Add your source files here
 set(SOURCES
-    #src/portfolio-backtester.cpp
-    #src/ETL.cpp
-    #src/ETL.cpp
-    #src/option_mc.cpp
-    #src/black_scholes.hpp
     # Header Files
     headers/options.h
     headers/options_european.h
     headers/options_american.h
     headers/rapidcsv.h
     headers/pricing_models.h
-    headers/greeks.h
     headers/date.h
     headers/calendar.h
-    #headers/pde.h
-    #headers/solve.h
+    headers/math.h
+    headers/black_scholes.h
     # Source Files
     src/date.cpp
     src/calendar.cpp
     src/options.cpp
     src/pricing_models.cpp
-    #src/pde.cpp
-    #src/solve.cpp
+    src/math.cpp
+    src/black_scholes.cpp
 )
 
 if(NOT EXAMPLE_TO_COMPILE)
