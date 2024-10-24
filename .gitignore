@@ -52,3 +52,12 @@ cmake_install.cmake
 CMakeCache.txt
 bin
 build
+.cmake
+
+# stuff from CLion
+.ninja_deps
+.ninja_log
+build.ninja
+
+# Testing shit
+Testing

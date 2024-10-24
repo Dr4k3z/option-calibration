@@ -27,6 +27,6 @@ int main(){
        float marketPrice = 0.0389972;
 
        // Calculate implied volatility and calibrate your model
-       std::cout << "ImpliedVol BS = " << BlackScholes::impliedVolatility(call,1,0.03,call.time2maturity(),marketPrice) << std::endl;
+       std::cout << "ImpliedVol BS = " << BlackScholes::impliedVolatility(call,1,0.03,call.time2maturity(),marketPrice,NewtonRaphson) << std::endl;
        std::cout << "ImpliedVol CRR = " << CRR::impliedVolatility(call,1,0.03,call.time2maturity(),marketPrice) << std::endl;
 }
